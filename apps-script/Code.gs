@@ -1,16 +1,5 @@
-// Panadería San Vicente — Google Apps Script
-// Pasos para configurar:
-// 1. Abrí tu Google Sheet
-// 2. Extensiones → Apps Script
-// 3. Borrá todo y pegá este código
-// 4. Guardá (Ctrl+S)
-// 5. Implementar → Nueva implementación → App web
-//    - Ejecutar como: Yo mismo
-//    - Quién tiene acceso: Cualquier persona
-// 6. Copiá la URL y pegala en la app (pestaña Config → URL del Apps Script)
-
 var SPREADSHEET_ID = '1SdfAtqWB-vflhcUwd8VJ0QH4UVUpdU70ZM2SgvV1vTA';
-var SHEET_NAME = 'Remitos'; // Nombre de la hoja donde se guardarán los datos
+var SHEET_NAME = 'Remitos';
 
 function doPost(e) {
   try {
@@ -18,19 +7,17 @@ function doPost(e) {
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sheet = ss.getSheetByName(SHEET_NAME);
 
-    // Si la hoja no existe, crearla con encabezados
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
-      sheet.appendRow(['Fecha', 'Día', 'Persona', 'Producto', 'Categoría', 'Tipo', 'Cantidad', 'Precio unitario', 'Subtotal', 'Total remito', 'ID remito']);
+      sheet.appendRow(['Fecha', 'Dia', 'Persona', 'Producto', 'Categoria', 'Tipo', 'Cantidad', 'Precio unitario', 'Subtotal', 'Total remito', 'ID remito']);
       sheet.getRange(1, 1, 1, 11).setFontWeight('bold');
       sheet.setFrozenRows(1);
     }
 
-    // Agregar una fila por cada producto del remito
     if (data.rows && Array.isArray(data.rows)) {
       data.rows.forEach(function(row) {
         var fecha = new Date(row.fecha + 'T12:00:00');
-        var dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        var dias = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
         var dia = dias[fecha.getDay()];
         sheet.appendRow([
           row.fecha,
@@ -59,16 +46,15 @@ function doPost(e) {
   }
 }
 
-// Para probar manualmente desde el editor:
 function testPost() {
   var testData = {
     remito_id: 'test123',
-    fecha: '2025-10-21',
+    fecha: '2025-10-22',
     persona: 'Javier',
     total: 15000,
     rows: [
-      { fecha: '2025-10-21', persona: 'Javier', producto: 'Medialunas', categoria: 'Docena', tipo: 'docena', cantidad: 5, precio_unit: 2000, subtotal: 10000 },
-      { fecha: '2025-10-21', persona: 'Javier', producto: 'Figacitas de manteca', categoria: 'Por kilo', tipo: 'kilo', cantidad: 2.5, precio_unit: 2000, subtotal: 5000 }
+      { fecha: '2025-10-22', persona: 'Javier', producto: 'Medialunas', categoria: 'Docena', tipo: 'docena', cantidad: 5, precio_unit: 2000, subtotal: 10000 },
+      { fecha: '2025-10-22', persona: 'Javier', producto: 'Figacitas', categoria: 'Por kilo', tipo: 'kilo', cantidad: 2.5, precio_unit: 2000, subtotal: 5000 }
     ]
   };
   var e = { postData: { contents: JSON.stringify(testData) } };
