@@ -1,20 +1,26 @@
 // Panadería San Vicente — Google Apps Script
-// Pegar este código en script.google.com, vinculado a tu Google Sheet.
-// Luego ir a "Implementar > Nueva implementación > App web"
-// - Ejecutar como: yo mismo
-// - Quién tiene acceso: cualquier persona
-// Copiar la URL generada y pegarla en la app (pestaña Config).
+// Pasos para configurar:
+// 1. Abrí tu Google Sheet
+// 2. Extensiones → Apps Script
+// 3. Borrá todo y pegá este código
+// 4. Guardá (Ctrl+S)
+// 5. Implementar → Nueva implementación → App web
+//    - Ejecutar como: Yo mismo
+//    - Quién tiene acceso: Cualquier persona
+// 6. Copiá la URL y pegala en la app (pestaña Config → URL del Apps Script)
 
+var SPREADSHEET_ID = '1SdfAtqWB-vflhcUwd8VJ0QH4UVUpdU70ZM2SgvV1vTA';
 var SHEET_NAME = 'Remitos'; // Nombre de la hoja donde se guardarán los datos
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
 
     // Si la hoja no existe, crearla con encabezados
     if (!sheet) {
-      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(SHEET_NAME);
+      sheet = ss.insertSheet(SHEET_NAME);
       sheet.appendRow(['Fecha', 'Día', 'Persona', 'Producto', 'Categoría', 'Tipo', 'Cantidad', 'Precio unitario', 'Subtotal', 'Total remito', 'ID remito']);
       sheet.getRange(1, 1, 1, 11).setFontWeight('bold');
       sheet.setFrozenRows(1);
