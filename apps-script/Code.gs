@@ -172,24 +172,27 @@ function doPost(e) {
 
 function testGenerate() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var fecha = '2026-11-03';
+
+  // Write debug info directly to a Debug sheet
+  var dbg = ss.getSheetByName('Debug') || ss.insertSheet('Debug');
+  dbg.clearContents();
+
   var raw = ss.getSheetByName(RAW_SHEET);
-  if (!raw) { console.log('ERROR: No sheet named ' + RAW_SHEET); return; }
+  if (!raw) { dbg.getRange(1,1).setValue('ERROR: no sheet ' + RAW_SHEET); return; }
 
   var allRows = raw.getDataRange().getValues();
-  console.log('Total rows incl header: ' + allRows.length);
-
-  var fecha = '2026-11-03';
   var tz = Session.getScriptTimeZone();
-  console.log('Script timezone: ' + tz);
+  dbg.getRange(1,1).setValue('Timezone: ' + tz);
+  dbg.getRange(2,1).setValue('Total rows (incl header): ' + allRows.length);
 
-  // Show first 5 data rows to see how dates are stored
   for (var i = 1; i <= Math.min(5, allRows.length - 1); i++) {
     var val = allRows[i][0];
     var isDate = val instanceof Date;
     var dateStr = isDate ? Utilities.formatDate(val, tz, 'yyyy-MM-dd') : String(val);
-    console.log('Row ' + i + ': val=' + val + ' | isDate=' + isDate + ' | dateStr=' + dateStr + ' | match=' + (dateStr === fecha));
+    dbg.getRange(i + 2, 1).setValue('Row ' + i + ': [' + val + '] isDate=' + isDate + ' dateStr=' + dateStr + ' match=' + (dateStr === fecha));
   }
 
   generateDailySheet(ss, fecha);
-  console.log('Done');
+  dbg.getRange(9,1).setValue('generateDailySheet done');
 }
