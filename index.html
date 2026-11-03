@@ -1011,12 +1011,31 @@ async function syncToSheets(remito) {
       }))
     };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    const url = cfg.sheetsUrl + '?d=' + encodeURIComponent(encoded);
     await new Promise((resolve) => {
-      const img = new Image();
-      img.onload = img.onerror = () => resolve();
-      img.src = url;
-      setTimeout(resolve, 8000);
+      const iframeName = 'gs-' + Date.now();
+      const iframe = document.createElement('iframe');
+      iframe.name = iframeName;
+      iframe.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px';
+      const form = document.createElement('form');
+      form.method = 'GET';
+      form.action = cfg.sheetsUrl;
+      form.target = iframeName;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'd';
+      input.value = encoded;
+      form.appendChild(input);
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      iframe.onload = () => {
+        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+        resolve();
+      };
+      form.submit();
+      setTimeout(() => {
+        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+        resolve();
+      }, 8000);
     });
     showToast('✓ Enviado al Sheet');
     updateSyncStatus('ok');
