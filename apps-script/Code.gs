@@ -57,8 +57,8 @@ function generateDailySheet(ss, fecha) {
   var p = fecha.split('-');
   var fechaDisplay = p[2] + '/' + p[1] + '/' + p[0];
 
-  // Sheet tab named DD/MM
-  var sheetTitle = p[2] + '/' + p[1];
+  // Sheet tab named like existing ones: "MARTES 03-11-2026"
+  var sheetTitle = diasNombre[d.getDay()] + ' ' + p[2] + '-' + p[1] + '-' + p[0];
   var ds = ss.getSheetByName(sheetTitle);
   if (ds) { ds.clear(); ds.clearFormats(); } else { ds = ss.insertSheet(sheetTitle); }
 
