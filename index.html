@@ -737,7 +737,7 @@ const DEFAULT_CONFIG = {
     { id: 'medialunas',   nombre: 'Medialunas',          cat: 'Docena',     tipo: 'docena',  precio: 5500 },
     { id: 'facturas',     nombre: 'Facturas surtidas',    cat: 'Docena',     tipo: 'docena',  precio: 5800 },
     // Por kilo
-    { id: 'figacitas',    nombre: 'Figacitas de manteca', cat: 'Por kilo',   tipo: 'kilo',    precio: 1700 },
+    { id: 'figacitas',    nombre: 'Figacitas de manteca', cat: 'Por kilo',   tipo: 'unidad',  precio: 1700, conversionKg: 4.1/77 },
     { id: 'flauta',       nombre: 'Flauta x3',            cat: 'Por kilo',   tipo: 'kilo',    precio: 1700 },
     { id: 'tortas',       nombre: 'Tortas',               cat: 'Por kilo',   tipo: 'kilo',    precio: 25000 },
     { id: 'minones',      nombre: 'Miñones',              cat: 'Por kilo',   tipo: 'kilo',    precio: 2000 },
@@ -887,7 +887,7 @@ function renderProducts() {
   Object.entries(cats).forEach(([cat, prods]) => {
     html += `<div class="section-title">${cat}</div><div class="product-group">`;
     prods.forEach(p => {
-      const tipoLabel = p.tipo === 'kilo' ? 'por kg' : p.tipo === 'docena' ? 'por doc.' : 'c/u';
+      const tipoLabel = p.conversionKg ? `u → kg · ${fmt(p.precio)}/kg` : p.tipo === 'kilo' ? 'por kg' : p.tipo === 'docena' ? 'por doc.' : 'c/u';
       html += `
         <div class="product-row" id="row-${p.id}">
           <div class="product-info">
@@ -896,7 +896,7 @@ function renderProducts() {
           </div>
           <div class="qty-wrap">
             <button class="qty-btn" onclick="adjQty('${p.id}', -1, '${p.tipo}')">−</button>
-            <input class="qty-in" type="number" min="0" step="${p.tipo === 'kilo' ? '0.1' : '1'}"
+            <input class="qty-in" type="number" min="0" step="1"
               id="qty-${p.id}" value="0" oninput="updateSubtotal('${p.id}')">
             <button class="qty-btn" onclick="adjQty('${p.id}', 1, '${p.tipo}')">+</button>
           </div>
@@ -921,9 +921,14 @@ function updateSubtotal(id) {
   const p = cfg.productos.find(x => x.id === id);
   if (!p) return;
   const qty = parseFloat(document.getElementById(`qty-${id}`).value) || 0;
-  const sub = qty * p.precio;
+  const kg = p.conversionKg ? qty * p.conversionKg : qty;
+  const sub = kg * p.precio;
   const el = document.getElementById(`sub-${id}`);
-  el.textContent = qty > 0 ? fmt(sub) : '—';
+  if (qty > 0) {
+    el.textContent = p.conversionKg ? `${fmt(sub)} (${kg.toFixed(2)}kg)` : fmt(sub);
+  } else {
+    el.textContent = '—';
+  }
   el.style.color = qty > 0 ? 'var(--accent)' : 'var(--fg2)';
   updateTotal();
 }
@@ -932,7 +937,8 @@ function updateTotal() {
   let total = 0;
   cfg.productos.forEach(p => {
     const qty = parseFloat(document.getElementById(`qty-${p.id}`)?.value) || 0;
-    total += qty * p.precio;
+    const kg = p.conversionKg ? qty * p.conversionKg : qty;
+    total += kg * p.precio;
   });
   document.getElementById('total-display').textContent = fmt(total);
 }
@@ -942,7 +948,8 @@ function getFormData() {
   cfg.productos.forEach(p => {
     const qty = parseFloat(document.getElementById(`qty-${p.id}`)?.value) || 0;
     if (qty > 0) {
-      lines.push({ id: p.id, nombre: p.nombre, cat: p.cat, tipo: p.tipo, cantidad: qty, precio: p.precio, subtotal: qty * p.precio });
+      const kg = p.conversionKg ? +(qty * p.conversionKg).toFixed(3) : qty;
+      lines.push({ id: p.id, nombre: p.nombre, cat: p.cat, tipo: p.conversionKg ? 'kilo' : p.tipo, cantidad: kg, precio: p.precio, subtotal: kg * p.precio });
     }
   });
   return lines;
