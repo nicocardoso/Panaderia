@@ -1000,7 +1000,7 @@ async function syncToSheets(remito) {
     await fetch(cfg.sheetsUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ remito_id: remito.id, fecha: remito.fecha, persona: remito.persona, total: remito.total, rows })
     });
     updateSyncStatus('ok');
