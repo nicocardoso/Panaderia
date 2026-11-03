@@ -989,34 +989,33 @@ async function saveRemito() {
 // ─────────────────────────────────────────────
 async function syncToSheets(remito) {
   if (!cfg.sheetsUrl) {
-    showToast('⚠️ URL de Sheet no configurada');
+    showToast('⚠️ URL de Sheet no configurada', 4000);
     return;
   }
   showToast('Enviando al Sheet...');
   try {
-    const rows = remito.productos.map(p => ({
+    const payload = {
+      remito_id: remito.id,
       fecha: remito.fecha,
       persona: remito.persona,
-      producto: p.nombre,
-      categoria: p.cat,
-      tipo: p.tipo,
-      cantidad: p.cantidad,
-      precio_unit: p.precio,
-      subtotal: p.subtotal
-    }));
-    const res = await fetch(cfg.sheetsUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ remito_id: remito.id, fecha: remito.fecha, persona: remito.persona, total: remito.total, rows })
-    });
-    const text = await res.text();
-    if (text.includes('"ok":true')) {
-      showToast('✓ Guardado en Sheet');
-      updateSyncStatus('ok');
-    } else {
-      showToast('⚠️ Sheet: ' + text.slice(0, 80), 5000);
-      updateSyncStatus('err');
-    }
+      total: remito.total,
+      rows: remito.productos.map(p => ({
+        fecha: remito.fecha,
+        persona: remito.persona,
+        producto: p.nombre,
+        categoria: p.cat,
+        tipo: p.tipo,
+        cantidad: p.cantidad,
+        precio_unit: p.precio,
+        subtotal: p.subtotal
+      }))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    const url = cfg.sheetsUrl + '?d=' + encodeURIComponent(encoded);
+    const res = await fetch(url, { mode: 'no-cors' });
+    // no-cors: response is opaque, assume success if no exception
+    showToast('✓ Enviado al Sheet');
+    updateSyncStatus('ok');
   } catch (e) {
     showToast('✗ Error: ' + e.message, 5000);
     updateSyncStatus('err');
