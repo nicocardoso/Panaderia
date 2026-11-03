@@ -988,9 +988,12 @@ async function saveRemito() {
 // Google Sheets sync
 // ─────────────────────────────────────────────
 async function syncToSheets(remito) {
-  if (!cfg.sheetsUrl) return;
+  if (!cfg.sheetsUrl) {
+    showToast('⚠️ URL de Sheet no configurada');
+    return;
+  }
+  showToast('Enviando al Sheet...');
   try {
-    // Build rows: one per product line
     const rows = remito.productos.map(p => ({
       fecha: remito.fecha,
       persona: remito.persona,
@@ -1001,12 +1004,21 @@ async function syncToSheets(remito) {
       precio_unit: p.precio,
       subtotal: p.subtotal
     }));
-    await fetch(cfg.sheetsUrl, {
+    const res = await fetch(cfg.sheetsUrl, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ remito_id: remito.id, fecha: remito.fecha, persona: remito.persona, total: remito.total, rows })
     });
-    updateSyncStatus('ok');
+    const text = await res.text();
+    if (text.includes('"ok":true')) {
+      showToast('✓ Guardado en Sheet');
+      updateSyncStatus('ok');
+    } else {
+      showToast('⚠️ Sheet: ' + text.slice(0, 80), 5000);
+      updateSyncStatus('err');
+    }
   } catch (e) {
+    showToast('✗ Error: ' + e.message, 5000);
     updateSyncStatus('err');
   }
 }
@@ -1312,12 +1324,12 @@ function confirmClearData() {
 // Toast
 // ─────────────────────────────────────────────
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, duration) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration || 2200);
 }
 
 // ─────────────────────────────────────────────
