@@ -30,7 +30,13 @@ function generateDailySheet(ss, fecha) {
   if (!raw) return;
 
   var rows = raw.getDataRange().getValues().slice(1)
-    .filter(function(r) { return String(r[0]) === fecha; });
+    .filter(function(r) {
+      var val = r[0];
+      var dateStr = (val instanceof Date)
+        ? Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(val);
+      return dateStr === fecha;
+    });
   if (!rows.length) return;
 
   // Aggregate by product
