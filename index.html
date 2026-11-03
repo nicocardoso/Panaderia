@@ -1012,8 +1012,12 @@ async function syncToSheets(remito) {
     };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     const url = cfg.sheetsUrl + '?d=' + encodeURIComponent(encoded);
-    const res = await fetch(url, { mode: 'no-cors' });
-    // no-cors: response is opaque, assume success if no exception
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = img.onerror = () => resolve();
+      img.src = url;
+      setTimeout(resolve, 8000);
+    });
     showToast('✓ Enviado al Sheet');
     updateSyncStatus('ok');
   } catch (e) {
