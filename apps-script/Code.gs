@@ -172,6 +172,24 @@ function doPost(e) {
 
 function testGenerate() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  generateDailySheet(ss, '2026-11-03');
+  var raw = ss.getSheetByName(RAW_SHEET);
+  if (!raw) { Logger.log('ERROR: No sheet named ' + RAW_SHEET); return; }
+
+  var allRows = raw.getDataRange().getValues();
+  Logger.log('Total rows incl header: ' + allRows.length);
+
+  var fecha = '2026-11-03';
+  var tz = Session.getScriptTimeZone();
+  Logger.log('Script timezone: ' + tz);
+
+  // Show first 5 data rows to see how dates are stored
+  for (var i = 1; i <= Math.min(5, allRows.length - 1); i++) {
+    var val = allRows[i][0];
+    var isDate = val instanceof Date;
+    var dateStr = isDate ? Utilities.formatDate(val, tz, 'yyyy-MM-dd') : String(val);
+    Logger.log('Row ' + i + ': val=' + val + ' | isDate=' + isDate + ' | dateStr=' + dateStr + ' | match=' + (dateStr === fecha));
+  }
+
+  generateDailySheet(ss, fecha);
   Logger.log('Done');
 }
