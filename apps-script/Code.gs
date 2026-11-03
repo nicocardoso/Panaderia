@@ -33,7 +33,7 @@ function generateDailySheet(ss, fecha) {
     .filter(function(r) {
       var val = r[0];
       var dateStr = (val instanceof Date)
-        ? Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        ? Utilities.formatDate(val, 'UTC', 'yyyy-MM-dd')
         : String(val);
       return dateStr === fecha;
     });
@@ -189,7 +189,7 @@ function testGenerate() {
   for (var i = 1; i <= Math.min(5, allRows.length - 1); i++) {
     var val = allRows[i][0];
     var isDate = val instanceof Date;
-    var dateStr = isDate ? Utilities.formatDate(val, tz, 'yyyy-MM-dd') : String(val);
+    var dateStr = isDate ? Utilities.formatDate(val, 'UTC', 'yyyy-MM-dd') : String(val);
     dbg.getRange(i + 2, 1).setValue('Row ' + i + ': [' + val + '] isDate=' + isDate + ' dateStr=' + dateStr + ' match=' + (dateStr === fecha));
   }
 
