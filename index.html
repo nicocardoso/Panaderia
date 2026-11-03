@@ -1001,11 +1001,8 @@ async function syncToSheets(remito) {
       precio_unit: p.precio,
       subtotal: p.subtotal
     }));
-    // no-cors because Apps Script responds with redirect
     await fetch(cfg.sheetsUrl, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ remito_id: remito.id, fecha: remito.fecha, persona: remito.persona, total: remito.total, rows })
     });
     updateSyncStatus('ok');
